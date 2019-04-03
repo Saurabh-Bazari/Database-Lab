@@ -1,0 +1,29 @@
+1.
+select studentname from rsc,student,course where course.coursename = "ME201" AND course.courseid = rsc.rcourseid AND rsc.rstudentid = student.studentid;
+
+2.
+select studentname from teacher,rtc,rsc,student where  teacher.teacherid = rtc.rteacherid AND rtc.rcourseid = rsc.rcourseid AND rsc.studentid = student.studentid AND teacher.teachername = "tsaurabh";
+
+3.
+select course.coursename from course,student,rsc where student.studentname  = "saurabh" AND  rsc.rstudentid = student.studentid AND rsc.rcourseid = course.courseid  AND student.deptid != course.deptid;
+
+4.
+insert rsc values (160101061,100);
+
+5.
+delete from course where courseid = 1;
+
+6.
+select course.coursename from course,rsc where rsc.rstudentid = 160101061 AND rsc.rcourseid = course.courseid;
+
+7.
+select studentname from student where studentid in (  	select distinct rstudentid from rsc where rcourseid in( select rcourseid from rsc where rstudentid = "160101061" 	) );
+
+8.
+select coursename from course,rsc,student where deptid = 1 AND courseid = rsc.rcourseid AND rsc.rstudentid = student.studentid AND student.deptid != 1;
+  
+9.
+select rstudentid from rsc where rcourseid = 1 AND score > 40 and score < 50; select rstudentid from rsc where rcourseid = 1 AND score > 40 and score < 60;
+
+10.
+insert rtc values (1 , 3 , 1);
