@@ -1,0 +1,146 @@
+1
+
+select studentname from student 
+where studentid in (
+select rstudentid from rsc 
+where rcourseid in(
+select courseid from course
+where courseid not in(
+select rcourseid from rsc 
+where rstudentid = "160101061"
+)
+)
+)
+;
+
+2
+
+select studentname from student 
+where studentid in (
+SELECT rstudentid FROM rsc as sx
+WHERE NOT EXISTS (
+SELECT p.rcourseid FROM rsc as p where p.rstudentid = "160101061" and p.rcourseid not in
+(SELECT sp.rcourseid FROM  rsc as sp WHERE sp.rstudentid = sx.rstudentid )
+)
+)
+;
+
+3
+
+select studentname from student
+where studentid in (
+select rstudentid from rsc 
+where rcourseid in(
+select p.rcourseid from rtc as p
+where p.rteacherid = 1    or p.rteacherid =  3 
+)
+);
+
+4
+
+select studentname from student
+where studentid in (
+select p.rstudentid from rsc p natural join rtc p4
+where ( p4.rteacherid = 1 or p4.rteacherid = 2 ) and 
+not( 
+exists (select p5.rstudentid from rsc p5 natural join rtc  p1 where p1.rteacherid = 1 and p5.rstudentid = p.rstudentid )  and 
+exists (select p6.rstudentid from rsc p6 natural join rtc  p2 where p2.rteacherid = 2 and p6.rstudentid = p.rstudentid )
+)
+);
+
+5
+
+select studentname from student
+where studentid in(
+select p.rstudentid from rsc as p
+where  p.score > any( select avg(score) from rsc where p.rcourseid != rcourseid group by rcourseid   )
+);
+
+
+6
+
+select deptid, count(teacherid) from teacher 
+    group by deptid;
+
+
+7
+
+select studentname from student
+where studentid in(
+    select p.rstudentid from rsc as p
+    where not exists (
+        select * from rsc natural join rtc
+        where rteacherid = 1 and rstudentid = p.rstudentid
+    )
+);
+
+8
+
+select r.rcourseid,c.deptid, avg(score) from rsc r join student c on c.studentid = r.rstudentid 
+    group by r.rcourseid,c.deptid;
+
+
+
+9
+
+SELECT f1.marks, f1.dept, f2.course FROM
+(
+SELECT MAX(marks) AS marks, dept FROM (
+SELECT AVG(score) as marks, s.deptid as dept, t2.rcourseid as course FROM student s JOIN rsc t2 on s.studentid = t2.rstudentid GROUP BY t2.rcourseid, s.deptid
+)
+AS T GROUP BY dept
+) as f1
+INNER JOIN 
+(SELECT AVG(score) as marks, s.deptid as dept, t2.rcourseid as course FROM student s JOIN rsc t2 on s.studentid = t2.rstudentid GROUP BY t2.rcourseid, s.deptid ) AS f2
+ON f1.marks = f2.marks AND f1.dept = f2.dept;
+
+
+
+
+10.
+
+SELECT GRADE, COUNT(GRADE) FROM (
+SELECT e.*,
+CASE 
+WHEN score >= 70 THEN 'A'
+WHEN score >= 40 AND score < 70 THEN 'B'
+ELSE 'F'
+END AS GRADE
+FROM rsc e
+WHERE rcourseid = 1
+)A GROUP BY GRADE;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+select distinct p.rcourseid  from rsc p join course c on c.courseid = p.rcourseid 
+where ( 
+
+    (select avg(score) from rsc where rcourseid = p.rcourseid group by rcourseid   )
+
+    = 
+    (select max(avg1) from (
+        select avg(score) as avg1 , c1.deptid  as did from rsc p1 join course c1 on c1.courseid = p1.rcourseid group by c1.courseid ) as a)
+);
+
+
+
+
+SELECT y.Department_ID, y.Course_Name, MAX(y.avg_marks) AS max_avg_marks FROM
+		(SELECT c.dept_id AS Department_ID, course_name AS Course_Name, AVG(marks) AS avg_marks 
+				FROM rsc sc JOIN course c USING (course_id) 
+			GROUP BY course_id ORDER BY dept_id, avg_marks DESC) AS y 
+	GROUP by y.Department_ID;
