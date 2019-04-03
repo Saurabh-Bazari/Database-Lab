@@ -1,0 +1,102 @@
+1.
+
+create index index_score on rsc (score);
+create index index_courseid on rsc (rcourseid);
+
+explain 
+select s.studentname from student  s join rsc r on s.studentid = r.rstudentid
+where 
+r.rcourseid = 1 
+and 
+r.score > (select avg(score) from rsc where rcourseid = 2)
+;
+
+
+2.
+
+create view stud_courses as select rsc.rstudentid , coursename from rsc , course where rsc.rcourseid = course.courseid ;
+
+3.
+
+delimiters//
+create trigger upadtescore before insert  
+on rsc  
+for each row 
+begin  
+if new.score < 0 Then set new.score= 0; 
+end if; 
+if new.score > 100 then set new.score = 100; 
+end if;  
+end//
+
+4.
+
+alter table rsc  add column attendance int;
+
+update rsc set attendance = rand()*100;
+
+
+5.
+
+create index index_roll on rsc(rstudentid);
+
+explain select distinct rstudentid from rsc  r
+where exists (select * from rsc p where r.rcourseid = p.rcourseid And p.rstudentid = "160101061" );
+
+6. 
+
+explain select distinct s.studentname from student  s join rsc r on s.studentid = r.rstudentid
+where exists (select * from rsc p where r.rcourseid = p.rcourseid And p.rstudentid = "160101061" )
+and
+SUBSTRING(s.studentname, 1, 5) = SUBSTRING((SELECT studentname FROM student WHERE studentid = '160101061'), 1, 5);
+
+7.
+
+create view v as select rstudentid , rcourseid , 
+CASE 
+WHEN score >= 70 THEN 'A'
+WHEN score >= 40 AND score < 70 THEN 'B'
+ELSE 'F'
+END AS GRADE 
+from rsc;
+
+8.
+
+delimiters //
+create trigger upadtescore before insert  
+on rsc  
+for each row 
+begin  
+if new.score < 0 Then set new.score= 0; 
+end if; 
+if new.score > 100 then set new.score = 100; 
+end if;  
+end //
+delimiters ;
+
+9.
+
+create table gradesheet 
+
+alter table rsc add column Grade char(1);
+
+DELIMITER $$
+CREATE TRIGGER before_insert_grade BEFORE INSERT ON rsc FOR EACH ROW 
+BEGIN 
+IF NEW.score < 40 THEN SET NEW.grade = 'F'; 
+ELSEIF NEW.score >= 40 AND NEW.score < 70 THEN SET NEW.grade = 'B';
+ELSEIF NEW.score >=70 THEN SET NEW.grade = 'A';
+END IF;
+END $$
+DELIMITER ;
+
+
+DELIMITER $$
+CREATE TRIGGER before_update_grade BEFORE Update ON rsc FOR EACH ROW 
+BEGIN 
+IF old.score < 40 THEN SET NEW.grade = 'F'; 
+ELSEIF old.score >= 40 AND old.score < 70 THEN SET NEW.grade = 'B';
+ELSEIF old.score >=70 THEN SET NEW.grade = 'A';
+END IF;
+END $$
+DELIMITER ;
